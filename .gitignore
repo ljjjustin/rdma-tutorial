@@ -1,0 +1,22 @@
+# common files
+*.swp
+
+# object files
+*.o
+*.ko
+*.obj
+*.elf
+
+# library files
+*.a
+*.lib
+*.la
+*.lo
+*.so
+*.so.*
+*.dylib
+*.dll
+
+# executable files
+*.out
+*.exe
