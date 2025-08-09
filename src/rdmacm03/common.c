@@ -116,8 +116,8 @@ struct connection *setup_connection(struct rdma_cm_id *cm_id) {
     nc->send_wr.num_sge = 1;
     nc->send_wr.next = NULL;
 
-    struct ibv_recv_wr *bad_wr = NULL;
-    IF_NZERO_DIE(ibv_post_recv(nc->qp, &nc->recv_wr, &bad_wr));
+    struct ibv_recv_wr *bad_rwr = NULL;
+    IF_NZERO_DIE(ibv_post_recv(nc->qp, &nc->recv_wr, &bad_rwr));
 
     return nc;
 }
