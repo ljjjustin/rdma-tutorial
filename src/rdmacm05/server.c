@@ -39,7 +39,7 @@ void handle_new_request(void *arg) {
     // register cq event fd
     struct epoll_event ev;
     int comp_fd = nc->cc->fd;
-    ev.events = EPOLLIN | EPOLLOUT | EPOLLERR;
+    ev.events = EPOLLIN;
     ev.data.ptr = nc->cc;
     if (epoll_ctl(epoll_fd, EPOLL_CTL_ADD, comp_fd, &ev))
         die("Failed to register cq event fd");
@@ -90,18 +90,25 @@ int handle_cm_event(struct rdma_event_channel *ec) {
             LOG("event: DISCONNECTED");
             cctx = new_event.id->context;
             if (cctx == NULL) break;
+
             cctx->state = DISCONNECTED;
             rdma_disconnect(cctx->id);
             rdma_destroy_id(cctx->id);
 
             struct connection *nc = cctx->conn;
-            if (nc->cc) ibv_destroy_comp_channel(nc->cc);
+            // unregister cq event fd
+            struct epoll_event ev;
+            int comp_fd = nc->cc->fd;
+            if (epoll_ctl(epoll_fd, EPOLL_CTL_DEL, comp_fd, &ev))
+                LOG("Failed to unregister cq event fd");
+
             if (nc->qp) ibv_destroy_qp(nc->qp);
             if (nc->cq) ibv_destroy_cq(nc->cq);
             if (nc->send_mr) ibv_dereg_mr(nc->send_mr);
             if (nc->recv_mr) ibv_dereg_mr(nc->recv_mr);
             if (nc->send_buff) free(nc->send_buff);
             if (nc->recv_buff) free(nc->recv_buff);
+            if (nc->cc) ibv_destroy_comp_channel(nc->cc);
             if (nc->pd) ibv_dealloc_pd(nc->pd);
             free(nc);
 

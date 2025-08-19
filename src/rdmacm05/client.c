@@ -1,8 +1,16 @@
 #include "common.h"
 
 int main(int argc, char *argv[]) {
-    if (argc != 2) {
-        fprintf(stderr, "usage: %s <server_ip>\n", argv[0]);
+    if (argc != 3) {
+        fprintf(stderr, "usage: %s <server_ip> <count>\n", argv[0]);
+        exit(1);
+    }
+    int count = atoi(argv[2]);
+    if (count <= 0) {
+        fprintf(
+            stderr,
+            "count must be a positive integer, usage: %s <server_ip> <count>\n",
+            argv[0]);
         exit(1);
     }
 
@@ -58,7 +66,7 @@ int main(int argc, char *argv[]) {
     struct ibv_recv_wr *bad_rwr = NULL;
     struct ibv_send_wr *bad_swr = NULL;
 
-    for (i = 0; i < 10; i++) {
+    for (i = 0; i < count; i++) {
         sprintf(nc->send_buff, "msg-%02d: hello", i);
         IF_NZERO_DIE(ibv_post_send(nc->qp, &nc->send_wr, &bad_swr));
 
